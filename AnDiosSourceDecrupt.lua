@@ -1,37 +1,15 @@
--- AnDiosUi Library
-
-local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 
 local AnDiosUi = {}
 
--- Функция для анимации появления элемента
-local function TweenIn(element, properties, duration)
-    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    local tween = TweenService:Create(element, tweenInfo, properties)
-    tween:Play()
-    return tween
-end
-
--- Функция для анимации исчезновения элемента
-local function TweenOut(element, properties, duration)
-    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-    local tween = TweenService:Create(element, tweenInfo, properties)
-    tween:Play()
-    return tween
-end
-
--- Создание основного окна
+-- Создание окна
 function AnDiosUi:CreateWindow(title)
     local ScreenGui = Instance.new("ScreenGui")
     local MainFrame = Instance.new("Frame")
-    local UICorner = Instance.new("UICorner")
-    local Title = Instance.new("TextLabel")
-    local TabsContainer = Instance.new("Frame")
-    local UIListLayout = Instance.new("UIListLayout")
-    local ContentFrame = Instance.new("Frame")
+    local TopBar = Instance.new("Frame")
+    local TitleLabel = Instance.new("TextLabel")
     local CloseButton = Instance.new("TextButton")
-    local MinimizeButton = Instance.new("TextButton")
 
     ScreenGui.Name = "AnDiosUi"
     ScreenGui.Parent = game.CoreGui
@@ -39,114 +17,78 @@ function AnDiosUi:CreateWindow(title)
     MainFrame.Name = "MainFrame"
     MainFrame.Parent = ScreenGui
     MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
-    MainFrame.Size = UDim2.new(0, 500, 0, 400)
+    MainFrame.Size = UDim2.new(0, 500, 0, 300)
+    MainFrame.Position = UDim2.new(0.5, -250, 0.5, -150)
     MainFrame.ClipsDescendants = true
 
-    UICorner.CornerRadius = UDim.new(0, 10)
-    UICorner.Parent = MainFrame
+    TopBar.Name = "TopBar"
+    TopBar.Parent = MainFrame
+    TopBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    TopBar.Size = UDim2.new(1, 0, 0, 30)
 
-    Title.Name = "Title"
-    Title.Parent = MainFrame
-    Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Title.BackgroundTransparency = 1
-    Title.Size = UDim2.new(0, 500, 0, 50)
-    Title.Font = Enum.Font.SourceSansBold
-    Title.Text = title or "AnDiosUi"
-    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.TextSize = 24
-
-    TabsContainer.Name = "TabsContainer"
-    TabsContainer.Parent = MainFrame
-    TabsContainer.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    TabsContainer.Position = UDim2.new(0, 0, 0.125, 0)
-    TabsContainer.Size = UDim2.new(0, 500, 0, 50)
-
-    UIListLayout.Parent = TabsContainer
-    UIListLayout.FillDirection = Enum.FillDirection.Horizontal
-    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
-    ContentFrame.Name = "ContentFrame"
-    ContentFrame.Parent = MainFrame
-    ContentFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    ContentFrame.Position = UDim2.new(0, 0, 0.25, 0)
-    ContentFrame.Size = UDim2.new(0, 500, 0, 300)
-    ContentFrame.ClipsDescendants = true
+    TitleLabel.Name = "TitleLabel"
+    TitleLabel.Parent = TopBar
+    TitleLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    TitleLabel.Size = UDim2.new(1, -40, 1, 0)
+    TitleLabel.Position = UDim2.new(0, 10, 0, 0)
+    TitleLabel.Font = Enum.Font.SourceSansBold
+    TitleLabel.Text = title or "AnDiosUi"
+    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleLabel.TextSize = 18
+    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 
     CloseButton.Name = "CloseButton"
-    CloseButton.Parent = MainFrame
-    CloseButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+    CloseButton.Parent = TopBar
+    CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
     CloseButton.Size = UDim2.new(0, 30, 0, 30)
-    CloseButton.Position = UDim2.new(1, -40, 0, 10)
+    CloseButton.Position = UDim2.new(1, -30, 0, 0)
+    CloseButton.Font = Enum.Font.SourceSansBold
     CloseButton.Text = "X"
     CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseButton.TextSize = 18
+
     CloseButton.MouseButton1Click:Connect(function()
-        TweenOut(MainFrame, {Size = UDim2.new(0, 0, 0, 0)}, 0.5).Completed:Connect(function()
-            ScreenGui:Destroy()
-        end)
+        ScreenGui:Destroy()
     end)
 
-    MinimizeButton.Name = "MinimizeButton"
-    MinimizeButton.Parent = MainFrame
-    MinimizeButton.BackgroundColor3 = Color3.fromRGB(200, 200, 0)
-    MinimizeButton.Size = UDim2.new(0, 30, 0, 30)
-    MinimizeButton.Position = UDim2.new(1, -80, 0, 10)
-    MinimizeButton.Text = "-"
-    MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    MinimizeButton.MouseButton1Click:Connect(function()
-        if MainFrame.Size == UDim2.new(0, 500, 0, 400) then
-            TweenOut(MainFrame, {Size = UDim2.new(0, 500, 0, 50)}, 0.5)
-        else
-            TweenIn(MainFrame, {Size = UDim2.new(0, 500, 0, 400)}, 0.5)
-        end
-    end)
+    AnDiosUi:MakeDraggable(MainFrame)
 
     return {
         ScreenGui = ScreenGui,
         MainFrame = MainFrame,
-        Title = Title,
-        TabsContainer = TabsContainer,
-        ContentFrame = ContentFrame,
-        Tabs = {},
+        TopBar = TopBar,
+        TitleLabel = TitleLabel,
+        CloseButton = CloseButton,
+        Tabs = {}
     }
 end
 
--- Добавление вкладки
+-- Создание вкладки
 function AnDiosUi:AddTab(window, tabName, imageId)
     local TabButton = Instance.new("TextButton")
-    local Image = Instance.new("ImageLabel")
+    local TabContent = Instance.new("Frame")
 
     TabButton.Name = tabName or "Tab"
-    TabButton.Parent = window.TabsContainer
-    TabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    TabButton.Parent = window.MainFrame
+    TabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     TabButton.Size = UDim2.new(0, 100, 0, 30)
-    TabButton.Font = Enum.Font.SourceSans
+    TabButton.Font = Enum.Font.SourceSansBold
     TabButton.Text = tabName or "Tab"
     TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TabButton.TextSize = 20
+    TabButton.TextSize = 18
 
-    Image.Name = "Image"
-    Image.Parent = TabButton
-    Image.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Image.BackgroundTransparency = 1
-    Image.Size = UDim2.new(0, 20, 0, 20)
-    Image.Position = UDim2.new(0, 5, 0, 5)
-    Image.Image = "rbxassetid://" .. (imageId or "")
-
-    local TabContent = Instance.new("Frame")
-    TabContent.Name = tabName or "TabContent"
-    TabContent.Parent = window.ContentFrame
+    TabContent.Name = "TabContent"
+    TabContent.Parent = window.MainFrame
     TabContent.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    TabContent.Size = UDim2.new(1, 0, 1, 0)
+    TabContent.Size = UDim2.new(1, 0, 1, -30)
+    TabContent.Position = UDim2.new(0, 0, 0, 30)
     TabContent.Visible = false
 
     TabButton.MouseButton1Click:Connect(function()
         for _, tab in pairs(window.Tabs) do
             tab.Content.Visible = false
-            tab.Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         end
         TabContent.Visible = true
-        TabButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
     end)
 
     table.insert(window.Tabs, {Button = TabButton, Content = TabContent})
@@ -159,39 +101,20 @@ end
 
 -- Переименование вкладки
 function AnDiosUi:RenameTab(tab, newName)
-    if tab and newName then
-        tab.Button.Text = newName
-        tab.Button.Name = newName
-        tab.Content.Name = newName .. "Content"
-    end
+    tab.Button.Text = newName or "Tab"
 end
 
--- Изменение изображения вкладки
+-- Установка изображения вкладки
 function AnDiosUi:SetTabImage(tab, imageId)
-    if tab and tab.Button:FindFirstChild("Image") then
-        tab.Button.Image.Image = "rbxassetid://" .. (imageId or "")
-    end
+    -- Можно добавить сюда код для установки изображения на кнопку вкладки
 end
 
--- Функция для расположения элементов
-local function ArrangeElements(parent)
-    local padding = 10
-    local xOffset, yOffset = 0, 0
-    local parentWidth = parent.AbsoluteSize.X
-
-    for _, element in ipairs(parent:GetChildren()) do
-        if element:IsA("GuiObject") then
-            element.Position = UDim2.new(0, xOffset, 0, yOffset)
-            xOffset = xOffset + element.Size.X.Offset + padding
-
-            if xOffset + element.Size.X.Offset > parentWidth then
-                xOffset = 0
-                yOffset = yOffset + element.Size.Y.Offset + padding
-                element.Position = UDim2.new(0, xOffset, 0, yOffset)
-                xOffset = xOffset + element.Size.X.Offset + padding
-            end
-        end
-    end
+-- Упорядочивание элементов внутри вкладки
+local function ArrangeElements(tabContent)
+    local UIGridLayout = tabContent:FindFirstChildOfClass("UIGridLayout") or Instance.new("UIGridLayout")
+    UIGridLayout.Parent = tabContent
+    UIGridLayout.CellSize = UDim2.new(0, 150, 0, 40)
+    UIGridLayout.FillDirectionMaxCells = 3
 end
 
 -- Добавление кнопки на вкладку
@@ -202,10 +125,10 @@ function AnDiosUi:AddButton(tab, buttonText, callback)
     Button.Parent = tab.Content
     Button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     Button.Size = UDim2.new(0, 150, 0, 40)
-    Button.Font = Enum.Font.SourceSans
+    Button.Font = Enum.Font.SourceSansBold
     Button.Text = buttonText or "Button"
     Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Button.TextSize = 20
+    Button.TextSize = 18
     Button.AutoButtonColor = true
 
     Button.MouseButton1Click:Connect(function()
@@ -227,10 +150,10 @@ function AnDiosUi:AddLabel(tab, labelText)
     Label.Parent = tab.Content
     Label.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     Label.Size = UDim2.new(0, 150, 0, 40)
-    Label.Font = Enum.Font.SourceSans
+    Label.Font = Enum.Font.SourceSansBold
     Label.Text = labelText or "Label"
     Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Label.TextSize = 20
+    Label.TextSize = 18
 
     ArrangeElements(tab.Content)
 
@@ -254,10 +177,10 @@ function AnDiosUi:AddDropdown(tab, dropdownText, options, callback)
     DropdownButton.Parent = Dropdown
     DropdownButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     DropdownButton.Size = UDim2.new(1, 0, 1, 0)
-    DropdownButton.Font = Enum.Font.SourceSans
+    DropdownButton.Font = Enum.Font.SourceSansBold
     DropdownButton.Text = dropdownText or "Dropdown"
     DropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    DropdownButton.TextSize = 20
+    DropdownButton.TextSize = 18
 
     DropdownList.Name = "DropdownList"
     DropdownList.Parent = Dropdown
@@ -276,20 +199,20 @@ function AnDiosUi:AddDropdown(tab, dropdownText, options, callback)
         OptionButton.Parent = DropdownList
         OptionButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
         OptionButton.Size = UDim2.new(1, 0, 0, 30)
-        OptionButton.Font = Enum.Font.SourceSans
+        OptionButton.Font = Enum.Font.SourceSansBold
         OptionButton.Text = option
         OptionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        OptionButton.TextSize = 20
+        OptionButton.TextSize = 18
 
         OptionButton.MouseButton1Click:Connect(function()
             DropdownButton.Text = option
             TweenOut(DropdownList, {Size = UDim2.new(1, 0, 0, 0)}, 0.5).Completed:Connect(function()
                 DropdownList.Visible = false
             end)
+            isExpanded = false
             if callback then
                 callback(option)
             end
-            isExpanded = false
         end)
     end
 
@@ -310,22 +233,9 @@ function AnDiosUi:AddDropdown(tab, dropdownText, options, callback)
     return Dropdown
 end
 
--- Установка значения выпадающего списка
-function AnDiosUi:SetDropdownValue(dropdown, value)
-    for _, child in pairs(dropdown.DropdownList:GetChildren()) do
-        if child:IsA("TextButton") and child.Text == value then
-            dropdown.DropdownButton.Text = value
-            return
-        end
-    end
-end
-
--- Функция для перемещения окна
+-- Перетаскивание окна
 function AnDiosUi:MakeDraggable(frame)
-    local dragging
-    local dragInput
-    local dragStart
-    local startPos
+    local dragging, dragInput, dragStart, startPos
 
     local function update(input)
         local delta = input.Position - dragStart
@@ -333,7 +243,7 @@ function AnDiosUi:MakeDraggable(frame)
     end
 
     frame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
             dragStart = input.Position
             startPos = frame.Position
@@ -347,7 +257,7 @@ function AnDiosUi:MakeDraggable(frame)
     end)
 
     frame.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
             dragInput = input
         end
     end)
