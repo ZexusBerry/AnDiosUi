@@ -173,6 +173,27 @@ function AnDiosUi:SetTabImage(tab, imageId)
     end
 end
 
+-- Функция для расположения элементов
+local function ArrangeElements(parent)
+    local padding = 10
+    local xOffset, yOffset = 0, 0
+    local parentWidth = parent.AbsoluteSize.X
+
+    for _, element in ipairs(parent:GetChildren()) do
+        if element:IsA("GuiObject") then
+            element.Position = UDim2.new(0, xOffset, 0, yOffset)
+            xOffset = xOffset + element.Size.X.Offset + padding
+
+            if xOffset + element.Size.X.Offset > parentWidth then
+                xOffset = 0
+                yOffset = yOffset + element.Size.Y.Offset + padding
+                element.Position = UDim2.new(0, xOffset, 0, yOffset)
+                xOffset = xOffset + element.Size.X.Offset + padding
+            end
+        end
+    end
+end
+
 -- Добавление кнопки на вкладку
 function AnDiosUi:AddButton(tab, buttonText, callback)
     local Button = Instance.new("TextButton")
@@ -180,17 +201,20 @@ function AnDiosUi:AddButton(tab, buttonText, callback)
     Button.Name = buttonText or "Button"
     Button.Parent = tab.Content
     Button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    Button.Size = UDim2.new(0, 100, 0, 30)
+    Button.Size = UDim2.new(0, 150, 0, 40)
     Button.Font = Enum.Font.SourceSans
     Button.Text = buttonText or "Button"
     Button.TextColor3 = Color3.fromRGB(255, 255, 255)
     Button.TextSize = 20
+    Button.AutoButtonColor = true
 
     Button.MouseButton1Click:Connect(function()
         if callback then
             callback()
         end
     end)
+
+    ArrangeElements(tab.Content)
 
     return Button
 end
@@ -201,12 +225,14 @@ function AnDiosUi:AddLabel(tab, labelText)
 
     Label.Name = labelText or "Label"
     Label.Parent = tab.Content
-    Label.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    Label.Size = UDim2.new(0, 100, 0, 30)
+    Label.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    Label.Size = UDim2.new(0, 150, 0, 40)
     Label.Font = Enum.Font.SourceSans
     Label.Text = labelText or "Label"
     Label.TextColor3 = Color3.fromRGB(255, 255, 255)
     Label.TextSize = 20
+
+    ArrangeElements(tab.Content)
 
     return Label
 end
@@ -222,7 +248,7 @@ function AnDiosUi:AddDropdown(tab, dropdownText, options, callback)
     Dropdown.Name = dropdownText or "Dropdown"
     Dropdown.Parent = tab.Content
     Dropdown.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    Dropdown.Size = UDim2.new(0, 100, 0, 30)
+    Dropdown.Size = UDim2.new(0, 150, 0, 40)
 
     DropdownButton.Name = "DropdownButton"
     DropdownButton.Parent = Dropdown
@@ -278,6 +304,8 @@ function AnDiosUi:AddDropdown(tab, dropdownText, options, callback)
         end
         isExpanded = not isExpanded
     end)
+
+    ArrangeElements(tab.Content)
 
     return Dropdown
 end
