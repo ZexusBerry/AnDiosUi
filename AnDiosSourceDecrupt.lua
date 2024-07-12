@@ -3,10 +3,19 @@
 local TweenService = game:GetService("TweenService")
 local AnDiosUi = {}
 
--- Анимация появления и исчезновения
-local function createTween(instance, properties, duration)
-    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-    local tween = TweenService:Create(instance, tweenInfo, properties)
+-- Функция для анимации появления элемента
+local function TweenIn(element, properties, duration)
+    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local tween = TweenService:Create(element, tweenInfo, properties)
+    tween:Play()
+    return tween
+end
+
+-- Функция для анимации исчезновения элемента
+local function TweenOut(element, properties, duration)
+    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+    local tween = TweenService:Create(element, tweenInfo, properties)
+    tween:Play()
     return tween
 end
 
@@ -16,10 +25,10 @@ function AnDiosUi:CreateWindow(title)
     local MainFrame = Instance.new("Frame")
     local UICorner = Instance.new("UICorner")
     local Title = Instance.new("TextLabel")
-    local CloseButton = Instance.new("TextButton")
-    local MinimizeButton = Instance.new("TextButton")
     local TabsContainer = Instance.new("Frame")
     local UIListLayout = Instance.new("UIListLayout")
+    local CloseButton = Instance.new("TextButton")
+    local MinimizeButton = Instance.new("TextButton")
     
     ScreenGui.Name = "AnDiosUi"
     ScreenGui.Parent = game.CoreGui
@@ -29,10 +38,8 @@ function AnDiosUi:CreateWindow(title)
     MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
     MainFrame.Size = UDim2.new(0, 400, 0, 300)
-    MainFrame.Visible = false
+    MainFrame.ClipsDescendants = true
     
-    createTween(MainFrame, {Size = UDim2.new(0, 400, 0, 300)}, 0.5):Play()
-
     UICorner.CornerRadius = UDim.new(0, 10)
     UICorner.Parent = MainFrame
 
@@ -40,31 +47,11 @@ function AnDiosUi:CreateWindow(title)
     Title.Parent = MainFrame
     Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Title.BackgroundTransparency = 1
-    Title.Size = UDim2.new(0, 300, 0, 50)
+    Title.Size = UDim2.new(0, 400, 0, 50)
     Title.Font = Enum.Font.SourceSans
     Title.Text = title or "AnDiosUi"
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
     Title.TextSize = 24
-
-    CloseButton.Name = "CloseButton"
-    CloseButton.Parent = MainFrame
-    CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    CloseButton.Position = UDim2.new(0.9, 0, 0, 0)
-    CloseButton.Size = UDim2.new(0, 40, 0, 40)
-    CloseButton.Font = Enum.Font.SourceSans
-    CloseButton.Text = "X"
-    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    CloseButton.TextSize = 24
-
-    MinimizeButton.Name = "MinimizeButton"
-    MinimizeButton.Parent = MainFrame
-    MinimizeButton.BackgroundColor3 = Color3.fromRGB(255, 255, 0)
-    MinimizeButton.Position = UDim2.new(0.8, 0, 0, 0)
-    MinimizeButton.Size = UDim2.new(0, 40, 0, 40)
-    MinimizeButton.Font = Enum.Font.SourceSans
-    MinimizeButton.Text = "-"
-    MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    MinimizeButton.TextSize = 24
 
     TabsContainer.Name = "TabsContainer"
     TabsContainer.Parent = MainFrame
@@ -76,17 +63,31 @@ function AnDiosUi:CreateWindow(title)
     UIListLayout.FillDirection = Enum.FillDirection.Horizontal
     UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
+    CloseButton.Name = "CloseButton"
+    CloseButton.Parent = MainFrame
+    CloseButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+    CloseButton.Size = UDim2.new(0, 30, 0, 30)
+    CloseButton.Position = UDim2.new(1, -40, 0, 10)
+    CloseButton.Text = "X"
+    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     CloseButton.MouseButton1Click:Connect(function()
-        createTween(MainFrame, {Size = UDim2.new(0, 0, 0, 0)}, 0.5):Play()
-        wait(0.5)
-        ScreenGui:Destroy()
+        TweenOut(MainFrame, {Size = UDim2.new(0, 0, 0, 0)}, 0.5).Completed:Connect(function()
+            ScreenGui:Destroy()
+        end)
     end)
 
+    MinimizeButton.Name = "MinimizeButton"
+    MinimizeButton.Parent = MainFrame
+    MinimizeButton.BackgroundColor3 = Color3.fromRGB(200, 200, 0)
+    MinimizeButton.Size = UDim2.new(0, 30, 0, 30)
+    MinimizeButton.Position = UDim2.new(1, -80, 0, 10)
+    MinimizeButton.Text = "-"
+    MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     MinimizeButton.MouseButton1Click:Connect(function()
         if MainFrame.Size == UDim2.new(0, 400, 0, 300) then
-            createTween(MainFrame, {Size = UDim2.new(0, 400, 0, 50)}, 0.5):Play()
+            TweenOut(MainFrame, {Size = UDim2.new(0, 400, 0, 50)}, 0.5)
         else
-            createTween(MainFrame, {Size = UDim2.new(0, 400, 0, 300)}, 0.5):Play()
+            TweenIn(MainFrame, {Size = UDim2.new(0, 400, 0, 300)}, 0.5)
         end
     end)
 
@@ -99,9 +100,9 @@ function AnDiosUi:CreateWindow(title)
 end
 
 -- Добавление вкладки
-function AnDiosUi:AddTab(window, tabName, iconId)
+function AnDiosUi:AddTab(window, tabName, imageId)
     local TabButton = Instance.new("TextButton")
-    local Icon = Instance.new("ImageLabel")
+    local Image = Instance.new("ImageLabel")
 
     TabButton.Name = tabName or "Tab"
     TabButton.Parent = window.TabsContainer
@@ -112,12 +113,13 @@ function AnDiosUi:AddTab(window, tabName, iconId)
     TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     TabButton.TextSize = 20
 
-    Icon.Name = "Icon"
-    Icon.Parent = TabButton
-    Icon.BackgroundTransparency = 1
-    Icon.Size = UDim2.new(0, 20, 0, 20)
-    Icon.Position = UDim2.new(0, 5, 0, 5)
-    Icon.Image = iconId or ""
+    Image.Name = "Image"
+    Image.Parent = TabButton
+    Image.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Image.BackgroundTransparency = 1
+    Image.Size = UDim2.new(0, 20, 0, 20)
+    Image.Position = UDim2.new(0, 5, 0, 5)
+    Image.Image = "rbxassetid://" .. (imageId or "")
 
     return TabButton
 end
@@ -130,12 +132,16 @@ function AnDiosUi:RenameTab(tab, newName)
     end
 end
 
--- Изменение иконки вкладки
-function AnDiosUi:ChangeTabIcon(tab, iconId)
-    local Icon = tab:FindFirstChild("Icon")
-    if Icon then
-        Icon.Image = iconId
+-- Изменение изображения вкладки
+function AnDiosUi:SetTabImage(tab, imageId)
+    if tab and tab:FindFirstChild("Image") then
+        tab.Image.Image = "rbxassetid://" .. (imageId or "")
     end
+end
+
+-- Переключение между вкладками
+function AnDiosUi:SwitchTab(tab)
+    -- Логика переключения вкладок
 end
 
 -- Добавление кнопки на вкладку
@@ -158,27 +164,6 @@ function AnDiosUi:AddButton(tab, buttonText, callback)
     end)
 
     return Button
-end
-
--- Изменение имени кнопки
-function AnDiosUi:RenameButton(button, newName)
-    if button and newName then
-        button.Text = newName
-        button.Name = newName
-    end
-end
-
--- Изменение доступности кнопки
-function AnDiosUi:SetButtonEnabled(button, enabled)
-    if button then
-        button.Active = enabled
-        button.TextTransparency = enabled and 0 or 0.5
-    end
-end
-
--- Переключение между вкладками
-function AnDiosUi:SwitchTab(tab)
-    -- Логика переключения вкладок
 end
 
 -- Перемещение окна
