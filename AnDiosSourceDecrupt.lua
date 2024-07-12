@@ -95,9 +95,9 @@ function AnDiosUi:CreateWindow(title)
     MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     MinimizeButton.MouseButton1Click:Connect(function()
         if MainFrame.Size == UDim2.new(0, 500, 0, 400) then
-            TweenOut(MainFrame, {Size = UDim2.new(0, 500, 0, 50)}, 0.5)
+            TweenOut(ContentFrame, {Size = UDim2.new(0, 500, 0, 0)}, 0.5)
         else
-            TweenIn(MainFrame, {Size = UDim2.new(0, 500, 0, 400)}, 0.5)
+            TweenIn(ContentFrame, {Size = UDim2.new(0, 500, 0, 300)}, 0.5)
         end
     end)
 
@@ -143,8 +143,10 @@ function AnDiosUi:AddTab(window, tabName, imageId)
     TabButton.MouseButton1Click:Connect(function()
         for _, tab in pairs(window.Tabs) do
             tab.Content.Visible = false
+            tab.Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         end
         TabContent.Visible = true
+        TabButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
     end)
 
     table.insert(window.Tabs, {Button = TabButton, Content = TabContent})
@@ -183,6 +185,7 @@ function AnDiosUi:AddButton(tab, buttonText, callback)
     Button.Text = buttonText or "Button"
     Button.TextColor3 = Color3.fromRGB(255, 255, 255)
     Button.TextSize = 20
+    Button.Position = UDim2.new(0, 0, #tab.Content:GetChildren() * 35, 0)
 
     Button.MouseButton1Click:Connect(function()
         if callback then
@@ -199,12 +202,13 @@ function AnDiosUi:AddLabel(tab, labelText)
 
     Label.Name = labelText or "Label"
     Label.Parent = tab.Content
-    Label.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    Label.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     Label.Size = UDim2.new(0, 100, 0, 30)
     Label.Font = Enum.Font.SourceSans
     Label.Text = labelText or "Label"
     Label.TextColor3 = Color3.fromRGB(255, 255, 255)
     Label.TextSize = 20
+    Label.Position = UDim2.new(0, 0, #tab.Content:GetChildren() * 35, 0)
 
     return Label
 end
@@ -220,6 +224,7 @@ function AnDiosUi:AddDropdown(tab, dropdownText, options, callback)
     Dropdown.Parent = tab.Content
     Dropdown.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     Dropdown.Size = UDim2.new(0, 100, 0, 30)
+    Dropdown.Position = UDim2.new(0, 0, #tab.Content:GetChildren() * 35, 0)
 
     DropdownButton.Name = "DropdownButton"
     DropdownButton.Parent = Dropdown
@@ -253,7 +258,9 @@ function AnDiosUi:AddDropdown(tab, dropdownText, options, callback)
 
         OptionButton.MouseButton1Click:Connect(function()
             DropdownButton.Text = option
-            DropdownList.Visible = false
+            TweenOut(DropdownList, {Size = UDim2.new(1, 0, 0, 0)}, 0.3).Completed:Connect(function()
+                DropdownList.Visible = false
+            end)
             if callback then
                 callback(option)
             end
@@ -261,10 +268,22 @@ function AnDiosUi:AddDropdown(tab, dropdownText, options, callback)
     end
 
     DropdownButton.MouseButton1Click:Connect(function()
-        DropdownList.Visible = not DropdownList.Visible
+        DropdownList.Visible = true
+        TweenIn(DropdownList, {Size = UDim2.new(1, 0, 0, #options * 30)}, 0.3)
     end)
 
     return Dropdown
+end
+
+-- Функция для получения значения выпадающего списка
+function AnDiosUi:DropDownValue(dropdown, value)
+    for _, option in pairs(dropdown.Content:GetChildren()) do
+        if option:IsA("TextButton") and option.Text == value then
+            dropdown.Button.Text = value
+            return value
+        end
+    end
+    return nil
 end
 
 -- Функция для перемещения окна
