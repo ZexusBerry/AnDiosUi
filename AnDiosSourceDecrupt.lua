@@ -206,4 +206,7 @@ function AnDiosUi:MakeDraggable(frame)
     end)
 end
 
+-- Добавление метода SetTabImage в объект AnDiosUi
+AnDiosUi.SetTabImage = SetTabImage
+
 return AnDiosUi
