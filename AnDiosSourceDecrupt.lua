@@ -32,7 +32,7 @@ function AnDiosUi:CreateWindow(title)
     local ContentFrame = Instance.new("Frame")
     local CloseButton = Instance.new("TextButton")
     local MinimizeButton = Instance.new("TextButton")
-    
+
     ScreenGui.Name = "AnDiosUi"
     ScreenGui.Parent = game.CoreGui
 
@@ -42,7 +42,7 @@ function AnDiosUi:CreateWindow(title)
     MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
     MainFrame.Size = UDim2.new(0, 500, 0, 400)
     MainFrame.ClipsDescendants = true
-    
+
     UICorner.CornerRadius = UDim.new(0, 10)
     UICorner.Parent = MainFrame
 
@@ -95,9 +95,9 @@ function AnDiosUi:CreateWindow(title)
     MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     MinimizeButton.MouseButton1Click:Connect(function()
         if MainFrame.Size == UDim2.new(0, 500, 0, 400) then
-            TweenOut(ContentFrame, {Size = UDim2.new(0, 500, 0, 0)}, 0.5)
+            TweenOut(MainFrame, {Size = UDim2.new(0, 500, 0, 50)}, 0.5)
         else
-            TweenIn(ContentFrame, {Size = UDim2.new(0, 500, 0, 300)}, 0.5)
+            TweenIn(MainFrame, {Size = UDim2.new(0, 500, 0, 400)}, 0.5)
         end
     end)
 
@@ -185,7 +185,6 @@ function AnDiosUi:AddButton(tab, buttonText, callback)
     Button.Text = buttonText or "Button"
     Button.TextColor3 = Color3.fromRGB(255, 255, 255)
     Button.TextSize = 20
-    Button.Position = UDim2.new(0, 0, #tab.Content:GetChildren() * 35, 0)
 
     Button.MouseButton1Click:Connect(function()
         if callback then
@@ -202,13 +201,12 @@ function AnDiosUi:AddLabel(tab, labelText)
 
     Label.Name = labelText or "Label"
     Label.Parent = tab.Content
-    Label.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    Label.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     Label.Size = UDim2.new(0, 100, 0, 30)
     Label.Font = Enum.Font.SourceSans
     Label.Text = labelText or "Label"
     Label.TextColor3 = Color3.fromRGB(255, 255, 255)
     Label.TextSize = 20
-    Label.Position = UDim2.new(0, 0, #tab.Content:GetChildren() * 35, 0)
 
     return Label
 end
@@ -219,12 +217,12 @@ function AnDiosUi:AddDropdown(tab, dropdownText, options, callback)
     local DropdownButton = Instance.new("TextButton")
     local DropdownList = Instance.new("Frame")
     local UIListLayout = Instance.new("UIListLayout")
+    local isExpanded = false
 
     Dropdown.Name = dropdownText or "Dropdown"
     Dropdown.Parent = tab.Content
     Dropdown.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     Dropdown.Size = UDim2.new(0, 100, 0, 30)
-    Dropdown.Position = UDim2.new(0, 0, #tab.Content:GetChildren() * 35, 0)
 
     DropdownButton.Name = "DropdownButton"
     DropdownButton.Parent = Dropdown
@@ -240,6 +238,7 @@ function AnDiosUi:AddDropdown(tab, dropdownText, options, callback)
     DropdownList.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     DropdownList.Position = UDim2.new(0, 0, 1, 0)
     DropdownList.Size = UDim2.new(1, 0, 0, #options * 30)
+    DropdownList.ClipsDescendants = true
     DropdownList.Visible = false
 
     UIListLayout.Parent = DropdownList
@@ -258,32 +257,39 @@ function AnDiosUi:AddDropdown(tab, dropdownText, options, callback)
 
         OptionButton.MouseButton1Click:Connect(function()
             DropdownButton.Text = option
-            TweenOut(DropdownList, {Size = UDim2.new(1, 0, 0, 0)}, 0.3).Completed:Connect(function()
+            TweenOut(DropdownList, {Size = UDim2.new(1, 0, 0, 0)}, 0.5).Completed:Connect(function()
                 DropdownList.Visible = false
             end)
             if callback then
                 callback(option)
             end
+            isExpanded = false
         end)
     end
 
     DropdownButton.MouseButton1Click:Connect(function()
-        DropdownList.Visible = true
-        TweenIn(DropdownList, {Size = UDim2.new(1, 0, 0, #options * 30)}, 0.3)
+        if isExpanded then
+            TweenOut(DropdownList, {Size = UDim2.new(1, 0, 0, 0)}, 0.5).Completed:Connect(function()
+                DropdownList.Visible = false
+            end)
+        else
+            DropdownList.Visible = true
+            TweenIn(DropdownList, {Size = UDim2.new(1, 0, 0, #options * 30)}, 0.5)
+        end
+        isExpanded = not isExpanded
     end)
 
     return Dropdown
 end
 
--- Функция для получения значения выпадающего списка
-function AnDiosUi:DropDownValue(dropdown, value)
-    for _, option in pairs(dropdown.Content:GetChildren()) do
-        if option:IsA("TextButton") and option.Text == value then
-            dropdown.Button.Text = value
-            return value
+-- Установка значения выпадающего списка
+function AnDiosUi:SetDropdownValue(dropdown, value)
+    for _, child in pairs(dropdown.DropdownList:GetChildren()) do
+        if child:IsA("TextButton") and child.Text == value then
+            dropdown.DropdownButton.Text = value
+            return
         end
     end
-    return nil
 end
 
 -- Функция для перемещения окна
