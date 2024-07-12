@@ -1,5 +1,3 @@
--- AnDiosUi Library
-
 local TweenService = game:GetService("TweenService")
 local AnDiosUi = {}
 
@@ -39,7 +37,7 @@ function AnDiosUi:CreateWindow(title)
     MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
     MainFrame.Size = UDim2.new(0, 400, 0, 300)
     MainFrame.ClipsDescendants = true
-    
+
     UICorner.CornerRadius = UDim.new(0, 10)
     UICorner.Parent = MainFrame
 
@@ -91,11 +89,13 @@ function AnDiosUi:CreateWindow(title)
         end
     end)
 
+    -- Возвращаем объект окна и контейнер вкладок
     return {
         ScreenGui = ScreenGui,
         MainFrame = MainFrame,
         Title = Title,
         TabsContainer = TabsContainer,
+        Tabs = {}
     }
 end
 
@@ -103,7 +103,9 @@ end
 function AnDiosUi:AddTab(window, tabName, imageId)
     local TabButton = Instance.new("TextButton")
     local Image = Instance.new("ImageLabel")
-
+    local TabFrame = Instance.new("Frame")
+    
+    -- Настройки кнопки вкладки
     TabButton.Name = tabName or "Tab"
     TabButton.Parent = window.TabsContainer
     TabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
@@ -113,6 +115,7 @@ function AnDiosUi:AddTab(window, tabName, imageId)
     TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     TabButton.TextSize = 20
 
+    -- Настройки изображения на кнопке вкладки
     Image.Name = "Image"
     Image.Parent = TabButton
     Image.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -121,7 +124,26 @@ function AnDiosUi:AddTab(window, tabName, imageId)
     Image.Position = UDim2.new(0, 5, 0, 5)
     Image.Image = "rbxassetid://" .. (imageId or "")
 
-    return TabButton
+    -- Настройки фрейма вкладки
+    TabFrame.Name = tabName .. "Frame"
+    TabFrame.Parent = window.MainFrame
+    TabFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    TabFrame.Size = UDim2.new(0, 400, 0, 250)
+    TabFrame.Visible = false
+
+    table.insert(window.Tabs, {Button = TabButton, Frame = TabFrame})
+
+    -- Событие переключения вкладок
+    TabButton.MouseButton1Click:Connect(function()
+        for _, tab in pairs(window.Tabs) do
+            tab.Frame.Visible = false
+            tab.Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        end
+        TabFrame.Visible = true
+        TabButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    end)
+
+    return TabButton, TabFrame
 end
 
 -- Переименование вкладки
@@ -139,19 +161,15 @@ function AnDiosUi:SetTabImage(tab, imageId)
     end
 end
 
--- Переключение между вкладками
-function AnDiosUi:SwitchTab(tab)
-    -- Логика переключения вкладок
-end
-
 -- Добавление кнопки на вкладку
-function AnDiosUi:AddButton(tab, buttonText, callback)
+function AnDiosUi:AddButton(tabFrame, buttonText, callback)
     local Button = Instance.new("TextButton")
 
     Button.Name = buttonText or "Button"
-    Button.Parent = tab
+    Button.Parent = tabFrame
     Button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     Button.Size = UDim2.new(0, 100, 0, 30)
+    Button.Position = UDim2.new(0, 10, 0, #tabFrame:GetChildren() * 40)  -- Автоматическое размещение кнопки
     Button.Font = Enum.Font.SourceSans
     Button.Text = buttonText or "Button"
     Button.TextColor3 = Color3.fromRGB(255, 255, 255)
