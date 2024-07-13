@@ -52,7 +52,7 @@ function AnDiosUi:CreateMenu(title)
     Title.Parent = Header
     Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Title.BackgroundTransparency = 1
-    Title.Size = UDim2.new(1, 0, 1, 0)
+    Title.Size = UDim2.new(1, -100, 1, 0)
     Title.Font = Enum.Font.SourceSans
     Title.Text = title
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -73,6 +73,27 @@ function AnDiosUi:CreateMenu(title)
         TweenOut(MainFrame, {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0.5, 0, 0.5, 0)}, 0.5).Completed:Connect(function()
             ScreenGui:Destroy()
         end)
+    end)
+
+    local MinimizeButton = Instance.new("TextButton")
+    MinimizeButton.Name = "MinimizeButton"
+    MinimizeButton.Parent = Header
+    MinimizeButton.BackgroundColor3 = Color3.fromRGB(255, 255, 50)
+    MinimizeButton.Size = UDim2.new(0, 50, 1, 0)
+    MinimizeButton.Position = UDim2.new(1, -100, 0, 0)
+    MinimizeButton.Font = Enum.Font.SourceSansBold
+    MinimizeButton.Text = "-"
+    MinimizeButton.TextColor3 = Color3.fromRGB(30, 30, 30)
+    MinimizeButton.TextSize = 24
+
+    local minimized = false
+    MinimizeButton.MouseButton1Click:Connect(function()
+        if minimized then
+            TweenIn(MainFrame, {Size = UDim2.new(0, 600, 0, 400), Position = UDim2.new(0.5, -300, 0.5, -200)}, 0.5)
+        else
+            TweenOut(MainFrame, {Size = UDim2.new(0, 600, 0, 50), Position = UDim2.new(0.5, -300, 0.5, -25)}, 0.5)
+        end
+        minimized = not minimized
     end)
 
     self:MakeDraggable(Header)
@@ -276,55 +297,57 @@ function AnDiosUi:AddDropdown(tab, text, options, callback)
     return Dropdown
 end
 
--- Функция для создания сообщений
-function AnDiosUi:CreateMessage(text, description, duration, image)
+function AnDiosUi:CreateMessage(imageId, text, description, duration)
+    local ScreenGui = game.CoreGui:FindFirstChild("ScreenGui")
+    if not ScreenGui then
+        ScreenGui = Instance.new("ScreenGui")
+        ScreenGui.Parent = game.CoreGui
+    end
+
     local MessageFrame = Instance.new("Frame")
-    MessageFrame.Parent = game.CoreGui
+    MessageFrame.Parent = ScreenGui
     MessageFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     MessageFrame.Size = UDim2.new(0, 300, 0, 100)
-    MessageFrame.Position = UDim2.new(1, 300, 1, -150)
+    MessageFrame.Position = UDim2.new(1, -350, 1, -150)
     MessageFrame.BorderSizePixel = 0
 
     local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 6)
+    UICorner.CornerRadius = UDim.new(0, 10)
     UICorner.Parent = MessageFrame
 
-    local MessageTitle = Instance.new("TextLabel")
-    MessageTitle.Parent = MessageFrame
-    MessageTitle.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    MessageTitle.Size = UDim2.new(1, -60, 0, 30)
-    MessageTitle.Font = Enum.Font.SourceSansBold
-    MessageTitle.Text = text
-    MessageTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-    MessageTitle.TextSize = 20
-    MessageTitle.Position = UDim2.new(0, 10, 0, 10)
-    MessageTitle.BorderSizePixel = 0
+    local Image = Instance.new("ImageLabel")
+    Image.Parent = MessageFrame
+    Image.BackgroundTransparency = 1
+    Image.Size = UDim2.new(0, 80, 0, 80)
+    Image.Position = UDim2.new(0, 10, 0, 10)
+    Image.Image = imageId
 
-    local MessageDescription = Instance.new("TextLabel")
-    MessageDescription.Parent = MessageFrame
-    MessageDescription.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    MessageDescription.Size = UDim2.new(1, -20, 0, 50)
-    MessageDescription.Font = Enum.Font.SourceSans
-    MessageDescription.Text = description
-    MessageDescription.TextColor3 = Color3.fromRGB(200, 200, 200)
-    MessageDescription.TextSize = 16
-    MessageDescription.Position = UDim2.new(0, 10, 0, 40)
-    MessageDescription.BorderSizePixel = 0
-    MessageDescription.TextWrapped = true
+    local Title = Instance.new("TextLabel")
+    Title.Parent = MessageFrame
+    Title.BackgroundTransparency = 1
+    Title.Size = UDim2.new(1, -100, 0, 40)
+    Title.Position = UDim2.new(0, 100, 0, 10)
+    Title.Font = Enum.Font.SourceSansBold
+    Title.Text = text
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.TextSize = 24
 
-    if image then
-        local MessageImage = Instance.new("ImageLabel")
-        MessageImage.Parent = MessageFrame
-        MessageImage.BackgroundTransparency = 1
-        MessageImage.Size = UDim2.new(0, 40, 0, 40)
-        MessageImage.Position = UDim2.new(1, -50, 0, 10)
-        MessageImage.Image = image
-    end
+    local Description = Instance.new("TextLabel")
+    Description.Parent = MessageFrame
+    Description.BackgroundTransparency = 1
+    Description.Size = UDim2.new(1, -100, 0, 40)
+    Description.Position = UDim2.new(0, 100, 0, 50)
+    Description.Font = Enum.Font.SourceSans
+    Description.Text = description
+    Description.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Description.TextSize = 18
 
-    TweenIn(MessageFrame, {Position = UDim2.new(1, -320, 1, -150)}, 0.5)
+    -- Показ сообщения
+    Tween(MessageFrame, {Position = UDim2.new(1, -350, 1, -150)}, 0.5)
 
+    -- Удаление сообщения через duration секунд
     delay(duration, function()
-        TweenOut(MessageFrame, {Position = UDim2.new(1, 300, 1, -150)}, 0.5).Completed:Connect(function()
+        Tween(MessageFrame, {Position = UDim2.new(1, 0, 1, -150)}, 0.5).Completed:Connect(function()
             MessageFrame:Destroy()
         end)
     end)
