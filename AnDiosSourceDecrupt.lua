@@ -35,9 +35,6 @@ function AnDiosUi:CreateMenu(title)
     MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
     MainFrame.ClipsDescendants = true
     MainFrame.BorderSizePixel = 0
-    MainFrame.BackgroundTransparency = 1
-
-    TweenIn(MainFrame, {BackgroundTransparency = 0}, 0.5)
 
     local UICorner = Instance.new("UICorner")
     UICorner.CornerRadius = UDim.new(0, 6)
@@ -88,8 +85,7 @@ function AnDiosUi:CreateMenu(title)
     TabContainer.Position = UDim2.new(0, 0, 0, 50)
     TabContainer.BorderSizePixel = 0
     TabContainer.CanvasSize = UDim2.new(0, 0, 0, 30)
-    TabContainer.ScrollBarThickness = 6
-    TabContainer.ScrollBarImageColor3 = Color3.fromRGB(60, 60, 60)
+    TabContainer.ScrollBarThickness = 5
 
     local Tabs = {}
 
@@ -99,13 +95,14 @@ function AnDiosUi:CreateMenu(title)
         TabButton.Parent = TabContainer
         TabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         TabButton.Size = UDim2.new(0, 100, 1, 0)
+        TabButton.Position = UDim2.new(#Tabs * 0.1, 0, 0, 0)
         TabButton.Font = Enum.Font.SourceSansBold
         TabButton.Text = name
         TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
         TabButton.TextSize = 20
         TabButton.BorderSizePixel = 0
 
-        local TabFrame = Instance.new("Frame")
+        local TabFrame = Instance.new("ScrollingFrame")
         TabFrame.Name = name .. "Frame"
         TabFrame.Parent = MainFrame
         TabFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
@@ -113,6 +110,13 @@ function AnDiosUi:CreateMenu(title)
         TabFrame.Position = UDim2.new(0, 0, 0, 80)
         TabFrame.BorderSizePixel = 0
         TabFrame.Visible = false
+        TabFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+        TabFrame.ScrollBarThickness = 5
+
+        local UIListLayout = Instance.new("UIListLayout")
+        UIListLayout.Parent = TabFrame
+        UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        UIListLayout.Padding = UDim.new(0, 10)
 
         table.insert(Tabs, {Button = TabButton, Frame = TabFrame})
 
@@ -125,29 +129,28 @@ function AnDiosUi:CreateMenu(title)
             TabButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
         end)
 
-        local currentTabCount = #Tabs
-        TabContainer.CanvasSize = UDim2.new(0, currentTabCount * 100, 0, 30)
-        for i, tab in pairs(Tabs) do
-            tab.Button.Position = UDim2.new(0, (i - 1) * 100, 0, 0)
-        end
+        TabContainer.CanvasSize = UDim2.new(0, #Tabs * 100, 0, 30)
 
         return TabFrame
     end
 
+    -- Анимация появления меню
+    MainFrame.Size = UDim2.new(0, 0, 0, 0)
+    MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    TweenIn(MainFrame, {Size = UDim2.new(0, 600, 0, 400), Position = UDim2.new(0.5, -300, 0.5, -200)}, 0.5)
+
     return self, MainFrame
 end
 
--- Функция для упорядочивания элементов по вертикали
+-- Функция для упорядочивания элементов
 local function ArrangeElements(container)
-    local padding = 10
-    local currentY = padding
-
+    local canvasHeight = 0
     for _, element in ipairs(container:GetChildren()) do
         if element:IsA("GuiObject") then
-            element.Position = UDim2.new(0, padding, 0, currentY)
-            currentY = currentY + element.Size.Y.Offset + padding
+            canvasHeight = canvasHeight + element.Size.Y.Offset + 10
         end
     end
+    container.CanvasSize = UDim2.new(0, 0, 0, canvasHeight)
 end
 
 -- Добавление Label
@@ -155,7 +158,7 @@ function AnDiosUi:AddLabel(tab, text)
     local Label = Instance.new("TextLabel")
     Label.Parent = tab
     Label.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    Label.Size = UDim2.new(0, 150, 0, 30)
+    Label.Size = UDim2.new(1, -20, 0, 30)
     Label.Font = Enum.Font.SourceSans
     Label.Text = text
     Label.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -176,7 +179,7 @@ function AnDiosUi:AddButton(tab, text, callback)
     local Button = Instance.new("TextButton")
     Button.Parent = tab
     Button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    Button.Size = UDim2.new(0, 150, 0, 30)
+    Button.Size = UDim2.new(1, -20, 0, 30)
     Button.Font = Enum.Font.SourceSansBold
     Button.Text = text
     Button.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -188,6 +191,9 @@ function AnDiosUi:AddButton(tab, text, callback)
     UICorner.Parent = Button
 
     Button.MouseButton1Click:Connect(function()
+        TweenOut(Button, {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}, 0.2)
+        wait(0.2)
+        TweenIn(Button, {BackgroundColor3 = Color3.fromRGB(40, 40, 40)}, 0.2)
         if callback then
             callback()
         end
@@ -198,17 +204,17 @@ function AnDiosUi:AddButton(tab, text, callback)
     return Button
 end
 
--- Добавление Dropdown
+-- Добавление DropDown
 function AnDiosUi:AddDropdown(tab, text, options, callback)
     local Dropdown = Instance.new("Frame")
     Dropdown.Parent = tab
     Dropdown.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    Dropdown.Size = UDim2.new(0, 150, 0, 30)
+    Dropdown.Size = UDim2.new(1, -20, 0, 30)
     Dropdown.BorderSizePixel = 0
 
     local DropdownButton = Instance.new("TextButton")
     DropdownButton.Parent = Dropdown
-    DropdownButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    DropdownButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     DropdownButton.Size = UDim2.new(1, 0, 1, 0)
     DropdownButton.Font = Enum.Font.SourceSansBold
     DropdownButton.Text = text
@@ -245,7 +251,7 @@ function AnDiosUi:AddDropdown(tab, text, options, callback)
 
         OptionButton.MouseButton1Click:Connect(function()
             DropdownButton.Text = option
-            TweenOut(OptionFrame, {Size = UDim2.new(1, 0, 0, 0)}, 0.2).Completed:Connect(function()
+            TweenOut(OptionFrame, {Size = UDim2.new(1, 0, 0, 0)}, 0.3).Completed:Connect(function()
                 OptionFrame.Visible = false
             end)
             if callback then
@@ -256,18 +262,72 @@ function AnDiosUi:AddDropdown(tab, text, options, callback)
 
     DropdownButton.MouseButton1Click:Connect(function()
         if OptionFrame.Visible then
-            TweenOut(OptionFrame, {Size = UDim2.new(1, 0, 0, 0)}, 0.2).Completed:Connect(function()
+            TweenOut(OptionFrame, {Size = UDim2.new(1, 0, 0, 0)}, 0.3).Completed:Connect(function()
                 OptionFrame.Visible = false
             end)
         else
             OptionFrame.Visible = true
-            TweenIn(OptionFrame, {Size = UDim2.new(1, 0, 0, #options * 30)}, 0.2)
+            TweenIn(OptionFrame, {Size = UDim2.new(1, 0, 0, #options * 30)}, 0.3)
         end
     end)
 
     ArrangeElements(tab)
 
     return Dropdown
+end
+
+-- Функция для создания сообщений
+function AnDiosUi:CreateMessage(text, description, duration, image)
+    local MessageFrame = Instance.new("Frame")
+    MessageFrame.Parent = game.CoreGui
+    MessageFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    MessageFrame.Size = UDim2.new(0, 300, 0, 100)
+    MessageFrame.Position = UDim2.new(1, 300, 1, -150)
+    MessageFrame.BorderSizePixel = 0
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 6)
+    UICorner.Parent = MessageFrame
+
+    local MessageTitle = Instance.new("TextLabel")
+    MessageTitle.Parent = MessageFrame
+    MessageTitle.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    MessageTitle.Size = UDim2.new(1, -60, 0, 30)
+    MessageTitle.Font = Enum.Font.SourceSansBold
+    MessageTitle.Text = text
+    MessageTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    MessageTitle.TextSize = 20
+    MessageTitle.Position = UDim2.new(0, 10, 0, 10)
+    MessageTitle.BorderSizePixel = 0
+
+    local MessageDescription = Instance.new("TextLabel")
+    MessageDescription.Parent = MessageFrame
+    MessageDescription.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    MessageDescription.Size = UDim2.new(1, -20, 0, 50)
+    MessageDescription.Font = Enum.Font.SourceSans
+    MessageDescription.Text = description
+    MessageDescription.TextColor3 = Color3.fromRGB(200, 200, 200)
+    MessageDescription.TextSize = 16
+    MessageDescription.Position = UDim2.new(0, 10, 0, 40)
+    MessageDescription.BorderSizePixel = 0
+    MessageDescription.TextWrapped = true
+
+    if image then
+        local MessageImage = Instance.new("ImageLabel")
+        MessageImage.Parent = MessageFrame
+        MessageImage.BackgroundTransparency = 1
+        MessageImage.Size = UDim2.new(0, 40, 0, 40)
+        MessageImage.Position = UDim2.new(1, -50, 0, 10)
+        MessageImage.Image = image
+    end
+
+    TweenIn(MessageFrame, {Position = UDim2.new(1, -320, 1, -150)}, 0.5)
+
+    delay(duration, function()
+        TweenOut(MessageFrame, {Position = UDim2.new(1, 300, 1, -150)}, 0.5).Completed:Connect(function()
+            MessageFrame:Destroy()
+        end)
+    end)
 end
 
 -- Функция для перемещения окна
@@ -300,61 +360,6 @@ function AnDiosUi:MakeDraggable(header)
             local delta = input.Position - mousePos
             header.Parent.Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X, framePos.Y.Scale, framePos.Y.Offset + delta.Y)
         end
-    end)
-end
-
--- Добавление Message
-function AnDiosUi:AddMessage(text, description, image, duration)
-    local MessageFrame = Instance.new("Frame")
-    MessageFrame.Parent = game.CoreGui.AnDiosUi
-    MessageFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    MessageFrame.Size = UDim2.new(0, 300, 0, 100)
-    MessageFrame.Position = UDim2.new(1, -310, 1, -110)
-    MessageFrame.BorderSizePixel = 0
-    MessageFrame.AnchorPoint = Vector2.new(1, 1)
-    MessageFrame.BackgroundTransparency = 1
-
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 6)
-    UICorner.Parent = MessageFrame
-
-    local Image = Instance.new("ImageLabel")
-    Image.Parent = MessageFrame
-    Image.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Image.BackgroundTransparency = 1
-    Image.Size = UDim2.new(0, 50, 0, 50)
-    Image.Position = UDim2.new(0, 10, 0, 10)
-    Image.Image = image
-
-    local Title = Instance.new("TextLabel")
-    Title.Parent = MessageFrame
-    Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Title.BackgroundTransparency = 1
-    Title.Size = UDim2.new(0, 230, 0, 30)
-    Title.Position = UDim2.new(0, 70, 0, 10)
-    Title.Font = Enum.Font.SourceSansBold
-    Title.Text = text
-    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.TextSize = 20
-
-    local Description = Instance.new("TextLabel")
-    Description.Parent = MessageFrame
-    Description.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Description.BackgroundTransparency = 1
-    Description.Size = UDim2.new(0, 230, 0, 50)
-    Description.Position = UDim2.new(0, 70, 0, 40)
-    Description.Font = Enum.Font.SourceSans
-    Description.Text = description
-    Description.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Description.TextSize = 18
-    Description.TextWrapped = true
-
-    TweenIn(MessageFrame, {BackgroundTransparency = 0}, 0.5)
-
-    wait(duration)
-
-    TweenOut(MessageFrame, {BackgroundTransparency = 1}, 0.5).Completed:Connect(function()
-        MessageFrame:Destroy()
     end)
 end
 
