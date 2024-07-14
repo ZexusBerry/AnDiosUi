@@ -107,6 +107,12 @@ function AnDiosUi:CreateMenu(title)
     TabContainer.BorderSizePixel = 0
     TabContainer.CanvasSize = UDim2.new(0, 0, 0, 30)
     TabContainer.ScrollBarThickness = 5
+    TabContainer.ScrollingDirection = Enum.ScrollingDirection.X
+
+    local UIListLayout = Instance.new("UIListLayout")
+    UIListLayout.Parent = TabContainer
+    UIListLayout.FillDirection = Enum.FillDirection.Horizontal
+    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
     local Tabs = {}
 
@@ -116,7 +122,6 @@ function AnDiosUi:CreateMenu(title)
         TabButton.Parent = TabContainer
         TabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         TabButton.Size = UDim2.new(0, 100, 1, 0)
-        TabButton.Position = UDim2.new(#Tabs * 0.1, 0, 0, 0)
         TabButton.Font = Enum.Font.SourceSansBold
         TabButton.Text = name
         TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -178,7 +183,7 @@ end
 function AnDiosUi:AddLabel(tab, text)
     local Label = Instance.new("TextLabel")
     Label.Parent = tab
-    Label.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    Label.BackgroundColor3 = Color3.fromRGB(30,40, 40)
     Label.Size = UDim2.new(1, -20, 0, 30)
     Label.Font = Enum.Font.SourceSans
     Label.Text = text
@@ -297,57 +302,68 @@ function AnDiosUi:AddDropdown(tab, text, options, callback)
     return Dropdown
 end
 
-function AnDiosUi:CreateMessage(imageId, text, description, duration)
-    local ScreenGui = game.CoreGui:FindFirstChild("ScreenGui")
-    if not ScreenGui then
-        ScreenGui = Instance.new("ScreenGui")
-        ScreenGui.Parent = game.CoreGui
-    end
+-- Добавление Divider
+function AnDiosUi:AddDivider(tab)
+    local Divider = Instance.new("Frame")
+    Divider.Parent = tab
+    Divider.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    Divider.Size = UDim2.new(1, -20, 0, 2)
+    Divider.BorderSizePixel = 0
 
+    ArrangeElements(tab)
+
+    return Divider
+end
+
+-- Функция для создания сообщений
+function AnDiosUi:CreateMessage(text, description, duration, image)
     local MessageFrame = Instance.new("Frame")
-    MessageFrame.Parent = ScreenGui
+    MessageFrame.Parent = game.CoreGui
     MessageFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     MessageFrame.Size = UDim2.new(0, 300, 0, 100)
-    MessageFrame.Position = UDim2.new(1, -350, 1, -150)
+    MessageFrame.Position = UDim2.new(1, 300, 1, -150)
     MessageFrame.BorderSizePixel = 0
 
     local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.CornerRadius = UDim.new(0, 6)
     UICorner.Parent = MessageFrame
 
-    local Image = Instance.new("ImageLabel")
-    Image.Parent = MessageFrame
-    Image.BackgroundTransparency = 1
-    Image.Size = UDim2.new(0, 80, 0, 80)
-    Image.Position = UDim2.new(0, 10, 0, 10)
-    Image.Image = imageId
+    local MessageTitle = Instance.new("TextLabel")
+    MessageTitle.Parent = MessageFrame
+    MessageTitle.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    MessageTitle.Size = UDim2.new(1, -60, 0, 30)
+    MessageTitle.Font = Enum.Font.SourceSansBold
+    MessageTitle.Text = text
+    MessageTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    MessageTitle.TextSize = 20
+    MessageTitle.Position = UDim2.new(0, 10, 0, 10)
+    MessageTitle.BorderSizePixel = 0
 
-    local Title = Instance.new("TextLabel")
-    Title.Parent = MessageFrame
-    Title.BackgroundTransparency = 1
-    Title.Size = UDim2.new(1, -100, 0, 40)
-    Title.Position = UDim2.new(0, 100, 0, 10)
-    Title.Font = Enum.Font.SourceSansBold
-    Title.Text = text
-    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.TextSize = 24
+    local MessageDescription = Instance.new("TextLabel")
+    MessageDescription.Parent = MessageFrame
+    MessageDescription.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    MessageDescription.Size = UDim2.new(1, -20, 0, 50)
+    MessageDescription.Font = Enum.Font.SourceSans
+    MessageDescription.Text = description
+    MessageDescription.TextColor3 = Color3.fromRGB(200, 200, 200)
+    MessageDescription.TextSize = 16
+    MessageDescription.Position = UDim2.new(0, 10, 0, 40)
+    MessageDescription.BorderSizePixel = 0
+    MessageDescription.TextWrapped = true
 
-    local Description = Instance.new("TextLabel")
-    Description.Parent = MessageFrame
-    Description.BackgroundTransparency = 1
-    Description.Size = UDim2.new(1, -100, 0, 40)
-    Description.Position = UDim2.new(0, 100, 0, 50)
-    Description.Font = Enum.Font.SourceSans
-    Description.Text = description
-    Description.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Description.TextSize = 18
+    if image then
+        local MessageImage = Instance.new("ImageLabel")
+        MessageImage.Parent = MessageFrame
+        MessageImage.BackgroundTransparency = 1
+        MessageImage.Size = UDim2.new(0, 40, 0, 40)
+        MessageImage.Position = UDim2.new(1, -50, 0, 10)
+        MessageImage.Image = image
+    end
 
-    -- Показ сообщения
-    Tween(MessageFrame, {Position = UDim2.new(1, -350, 1, -150)}, 0.5)
+    TweenIn(MessageFrame, {Position = UDim2.new(1, -320, 1, -150)}, 0.5)
 
-    -- Удаление сообщения через duration секунд
     delay(duration, function()
-        Tween(MessageFrame, {Position = UDim2.new(1, 0, 1, -150)}, 0.5).Completed:Connect(function()
+        TweenOut(MessageFrame, {Position = UDim2.new(1, 300, 1, -150)}, 0.5).Completed:Connect(function()
             MessageFrame:Destroy()
         end)
     end)
