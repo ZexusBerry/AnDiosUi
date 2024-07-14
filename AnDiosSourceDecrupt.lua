@@ -183,7 +183,7 @@ end
 function AnDiosUi:AddLabel(tab, text)
     local Label = Instance.new("TextLabel")
     Label.Parent = tab
-    Label.BackgroundColor3 = Color3.fromRGB(30,40, 40)
+    Label.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     Label.Size = UDim2.new(1, -20, 0, 30)
     Label.Font = Enum.Font.SourceSans
     Label.Text = text
