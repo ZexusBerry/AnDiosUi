@@ -1,37 +1,8 @@
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
 
 local AnDiosUi = {}
 
--- Функция для создания твина
-local function TweenIn(object, properties, duration)
-    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    local tween = TweenService:Create(object, tweenInfo, properties)
-    tween:Play()
-    return tween
-end
-
-local function TweenOut(object, properties, duration)
-    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-    local tween = TweenService:Create(object, tweenInfo, properties)
-    tween:Play()
-    return tween
-end
-
--- Функция для организации элементов в табе
-local function ArrangeElements(tab)
-    local elements = tab:GetChildren()
-    local yOffset = 10
-    for _, element in ipairs(elements) do
-        if element:IsA("Frame") or element:IsA("TextButton") or element:IsA("TextLabel") or element:IsA("TextBox") then
-            element.Position = UDim2.new(0, 10, 0, yOffset)
-            yOffset = yOffset + element.Size.Y.Offset + 10
-        end
-    end
-    tab.Size = UDim2.new(1, 0, 0, yOffset)
-end
-
--- Функция для создания UI
+-- Функция для создания окна
 function AnDiosUi:CreateWindow(title)
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Parent = game.CoreGui
@@ -40,155 +11,127 @@ function AnDiosUi:CreateWindow(title)
     MainFrame.Name = "MainFrame"
     MainFrame.Parent = ScreenGui
     MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    MainFrame.Size = UDim2.new(0, 500, 0, 500)
-    MainFrame.Position = UDim2.new(0.5, -250, 0.5, -250)
+    MainFrame.Size = UDim2.new(0, 500, 0, 300)
+    MainFrame.Position = UDim2.new(0.5, -250, 0.5, -150)
     MainFrame.ClipsDescendants = true
-    MainFrame.BorderSizePixel = 0
+    MainFrame.Active = true
+    MainFrame.Draggable = true
 
     local UICorner = Instance.new("UICorner")
     UICorner.CornerRadius = UDim.new(0, 10)
     UICorner.Parent = MainFrame
 
-    local Header = Instance.new("Frame")
-    Header.Parent = MainFrame
-    Header.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    Header.Size = UDim2.new(1, 0, 0, 50)
-    Header.Position = UDim2.new(0, 0, 0, 0)
-    Header.BorderSizePixel = 0
+    local TitleBar = Instance.new("Frame")
+    TitleBar.Parent = MainFrame
+    TitleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    TitleBar.Size = UDim2.new(1, 0, 0, 30)
+    TitleBar.Position = UDim2.new(0, 0, 0, 0)
 
-    local Title = Instance.new("TextLabel")
-    Title.Parent = Header
-    Title.BackgroundTransparency = 1
-    Title.Size = UDim2.new(1, -100, 1, 0)
-    Title.Position = UDim2.new(0, 10, 0, 0)
-    Title.Font = Enum.Font.SourceSansBold
-    Title.Text = title
-    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.TextSize = 24
-    Title.TextXAlignment = Enum.TextXAlignment.Left
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Parent = TitleBar
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.Size = UDim2.new(1, -30, 1, 0)
+    TitleLabel.Position = UDim2.new(0, 10, 0, 0)
+    TitleLabel.Font = Enum.Font.SourceSansBold
+    TitleLabel.Text = title
+    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleLabel.TextSize = 18
+    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 
     local CloseButton = Instance.new("TextButton")
-    CloseButton.Parent = Header
-    CloseButton.BackgroundTransparency = 1
-    CloseButton.Size = UDim2.new(0, 50, 1, 0)
-    CloseButton.Position = UDim2.new(1, -50, 0, 0)
+    CloseButton.Parent = TitleBar
+    CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    CloseButton.Size = UDim2.new(0, 30, 1, 0)
+    CloseButton.Position = UDim2.new(1, -30, 0, 0)
     CloseButton.Font = Enum.Font.SourceSansBold
     CloseButton.Text = "X"
-    CloseButton.TextColor3 = Color3.fromRGB(255, 0, 0)
-    CloseButton.TextSize = 24
+    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseButton.TextSize = 18
+    CloseButton.BorderSizePixel = 0
 
-    local MinimizeButton = Instance.new("TextButton")
-    MinimizeButton.Parent = Header
-    MinimizeButton.BackgroundTransparency = 1
-    MinimizeButton.Size = UDim2.new(0, 50, 1, 0)
-    MinimizeButton.Position = UDim2.new(1, -100, 0, 0)
-    MinimizeButton.Font = Enum.Font.SourceSansBold
-    MinimizeButton.Text = "-"
-    MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 0)
-    MinimizeButton.TextSize = 24
+    local TabsFrame = Instance.new("Frame")
+    TabsFrame.Parent = MainFrame
+    TabsFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    TabsFrame.Size = UDim2.new(0, 120, 1, -30)
+    TabsFrame.Position = UDim2.new(0, 0, 0, 30)
+    TabsFrame.ClipsDescendants = true
+
+    local TabsLayout = Instance.new("UIListLayout")
+    TabsLayout.Parent = TabsFrame
+    TabsLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
     CloseButton.MouseButton1Click:Connect(function()
-        ScreenGui:Destroy()
+        local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        local tween = TweenService:Create(MainFrame, tweenInfo, {Transparency = 1})
+        tween:Play()
+        tween.Completed:Connect(function()
+            ScreenGui:Destroy()
+        end)
     end)
 
-    local isMinimized = false
-    MinimizeButton.MouseButton1Click:Connect(function()
-        isMinimized = not isMinimized
-        if isMinimized then
-            TweenOut(MainFrame, {Size = UDim2.new(0, 500, 0, 50)}, 0.5)
-        else
-            TweenIn(MainFrame, {Size = UDim2.new(0, 500, 0, 500)}, 0.5)
-        end
-    end)
-
-    local TabFrame = Instance.new("Frame")
-    TabFrame.Parent = MainFrame
-    TabFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    TabFrame.Size = UDim2.new(0, 150, 1, -50)
-    TabFrame.Position = UDim2.new(0, 0, 0, 50)
-    TabFrame.BorderSizePixel = 0
-
-    local TabList = Instance.new("UIListLayout")
-    TabList.Parent = TabFrame
-    TabList.SortOrder = Enum.SortOrder.LayoutOrder
-
-    local ContentFrame = Instance.new("Frame")
-    ContentFrame.Parent = MainFrame
-    ContentFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    ContentFrame.Size = UDim2.new(1, -150, 1, -50)
-    ContentFrame.Position = UDim2.new(0, 150, 0, 50)
-    ContentFrame.BorderSizePixel = 0
-
-    local ContentList = Instance.new("UIListLayout")
-    ContentList.Parent = ContentFrame
-    ContentList.SortOrder = Enum.SortOrder.LayoutOrder
-    ContentList.Padding = UDim.new(0, 10)
-
-    return {
-        ScreenGui = ScreenGui,
-        MainFrame = MainFrame,
-        Header = Header,
-        TabFrame = TabFrame,
-        ContentFrame = ContentFrame
-    }
+    return {ScreenGui = ScreenGui, MainFrame = MainFrame, TabsFrame = TabsFrame}
 end
 
 -- Функция для добавления вкладки
-function AnDiosUi:AddTab(gui, name)
+function AnDiosUi:AddTab(gui, title)
     local TabButton = Instance.new("TextButton")
-    TabButton.Parent = gui.TabFrame
-    TabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    TabButton.Size = UDim2.new(1, 0, 0, 50)
+    TabButton.Parent = gui.TabsFrame
+    TabButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    TabButton.Size = UDim2.new(1, 0, 0, 30)
     TabButton.Font = Enum.Font.SourceSansBold
-    TabButton.Text = name
+    TabButton.Text = title
     TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     TabButton.TextSize = 18
     TabButton.BorderSizePixel = 0
 
-    local TabContent = Instance.new("Frame")
-    TabContent.Parent = gui.ContentFrame
-    TabContent.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    TabContent.Size = UDim2.new(1, 0, 1, 0)
-    TabContent.Visible = false
-    TabContent.BorderSizePixel = 0
+    local TabFrame = Instance.new("Frame")
+    TabFrame.Parent = gui.MainFrame
+    TabFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    TabFrame.Size = UDim2.new(1, -120, 1, -30)
+    TabFrame.Position = UDim2.new(0, 120, 0, 30)
+    TabFrame.Visible = false
 
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 6)
-    UICorner.Parent = TabButton
+    local Layout = Instance.new("UIListLayout")
+    Layout.Parent = TabFrame
+    Layout.SortOrder = Enum.SortOrder.LayoutOrder
+    Layout.Padding = UDim.new(0, 10)
 
     TabButton.MouseButton1Click:Connect(function()
-        for _, child in ipairs(gui.ContentFrame:GetChildren()) do
-            if child:IsA("Frame") then
-                child.Visible = false
+        for _, frame in pairs(gui.MainFrame:GetChildren()) do
+            if frame:IsA("Frame") and frame ~= gui.TabsFrame then
+                frame.Visible = false
             end
         end
-        TabContent.Visible = true
+        TabFrame.Visible = true
     end)
 
-    ArrangeElements(gui.TabFrame)
-
-    return TabContent
+    return TabFrame
 end
 
--- Функция для добавления лейбла
-function AnDiosUi:AddLabel(tab, text)
-    local Label = Instance.new("TextLabel")
-    Label.Parent = tab
-    Label.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    Label.Size = UDim2.new(1, -20, 0, 30)
-    Label.Font = Enum.Font.SourceSans
-    Label.Text = text
-    Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Label.TextSize = 18
-    Label.BorderSizePixel = 0
+-- Функция для упорядочивания элементов
+local function ArrangeElements(tab)
+    local contentHeight = 0
+    for _, element in pairs(tab:GetChildren()) do
+        if element:IsA("GuiObject") then
+            contentHeight = contentHeight + element.Size.Y.Offset + 10
+        end
+    end
+    tab.CanvasSize = UDim2.new(0, 0, 0, contentHeight)
+end
 
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 4)
-    UICorner.Parent = Label
+-- Функция для анимации появления
+local function TweenIn(object, properties, duration)
+    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local tween = TweenService:Create(object, tweenInfo, properties)
+    tween:Play()
+end
 
-    ArrangeElements(tab)
-
-    return Label
+-- Функция для анимации исчезновения
+local function TweenOut(object, properties, duration)
+    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+    local tween = TweenService:Create(object, tweenInfo, properties)
+    tween:Play()
+    return tween
 end
 
 -- Функция для добавления кнопки
@@ -270,14 +213,14 @@ function AnDiosUi:AddCheckBox(tab, text, callback)
 
     ArrangeElements(tab)
 
-    return CheckBox
+    return CheckBoxFrame
 end
 
 -- Функция для добавления разделителя
 function AnDiosUi:AddDivider(tab)
     local Divider = Instance.new("Frame")
     Divider.Parent = tab
-    Divider.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    Divider.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     Divider.Size = UDim2.new(1, -20, 0, 2)
     Divider.BorderSizePixel = 0
 
@@ -293,6 +236,7 @@ function AnDiosUi:AddDropDown(tab, options, callback)
     DropDownFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     DropDownFrame.Size = UDim2.new(1, -20, 0, 30)
     DropDownFrame.BorderSizePixel = 0
+    DropDownFrame.ClipsDescendants = true
 
     local UICorner = Instance.new("UICorner")
     UICorner.CornerRadius = UDim.new(0, 4)
@@ -303,40 +247,25 @@ function AnDiosUi:AddDropDown(tab, options, callback)
     DropDownButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     DropDownButton.Size = UDim2.new(1, 0, 1, 0)
     DropDownButton.Font = Enum.Font.SourceSansBold
-    DropDownButton.Text = "Select Option"
+    DropDownButton.Text = "Select an option"
     DropDownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     DropDownButton.TextSize = 18
     DropDownButton.BorderSizePixel = 0
 
-    local DropDownList = Instance.new("Frame")
-    DropDownList.Parent = DropDownFrame
-    DropDownList.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    DropDownList.Size = UDim2.new(1, 0, 0, 0)
-    DropDownList.Position = UDim2.new(0, 0, 1, 0)
-    DropDownList.BorderSizePixel = 0
-    DropDownList.ClipsDescendants = true
-    DropDownList.Visible = false
+    local OptionsFrame = Instance.new("Frame")
+    OptionsFrame.Parent = DropDownFrame
+    OptionsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    OptionsFrame.Size = UDim2.new(1, 0, 0, #options * 30)
+    OptionsFrame.Position = UDim2.new(0, 0, 1, 0)
+    OptionsFrame.Visible = false
 
-    local ListLayout = Instance.new("UIListLayout")
-    ListLayout.Parent = DropDownList
-    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
-    local isOpen = false
-    DropDownButton.MouseButton1Click:Connect(function()
-        isOpen = not isOpen
-        if isOpen then
-            DropDownList.Visible = true
-            TweenIn(DropDownList, {Size = UDim2.new(1, 0, 0, #options * 30)}, 0.2)
-        else
-            TweenOut(DropDownList, {Size = UDim2.new(1, 0, 0, 0)}, 0.2).Completed:Connect(function()
-                DropDownList.Visible = false
-            end)
-        end
-    end)
+    local OptionsLayout = Instance.new("UIListLayout")
+    OptionsLayout.Parent = OptionsFrame
+    OptionsLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
     for _, option in ipairs(options) do
         local OptionButton = Instance.new("TextButton")
-        OptionButton.Parent = DropDownList
+        OptionButton.Parent = OptionsFrame
         OptionButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
         OptionButton.Size = UDim2.new(1, 0, 0, 30)
         OptionButton.Font = Enum.Font.SourceSansBold
@@ -347,19 +276,20 @@ function AnDiosUi:AddDropDown(tab, options, callback)
 
         OptionButton.MouseButton1Click:Connect(function()
             DropDownButton.Text = option
-            isOpen = false
-            TweenOut(DropDownList, {Size = UDim2.new(1, 0, 0, 0)}, 0.2).Completed:Connect(function()
-                DropDownList.Visible = false
-            end)
+            OptionsFrame.Visible = false
             if callback then
                 callback(option)
             end
         end)
     end
 
+    DropDownButton.MouseButton1Click:Connect(function()
+        OptionsFrame.Visible = not OptionsFrame.Visible
+    end)
+
     ArrangeElements(tab)
 
-    return DropDownButton
+    return DropDownFrame
 end
 
 -- Функция для добавления сообщения
@@ -368,12 +298,12 @@ function AnDiosUi:AddMessage(gui, title, text, duration)
     MessageFrame.Parent = gui.ScreenGui
     MessageFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     MessageFrame.Size = UDim2.new(0, 300, 0, 100)
-    MessageFrame.Position = UDim2.new(1, 300, 1, -110)
-    MessageFrame.BorderSizePixel = 0
+    MessageFrame.Position = UDim2.new(1, -310, 1, -110)
+    MessageFrame.AnchorPoint = Vector2.new(1, 1)
     MessageFrame.ClipsDescendants = true
 
     local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.CornerRadius = UDim.new(0, 4)
     UICorner.Parent = MessageFrame
 
     local TitleLabel = Instance.new("TextLabel")
@@ -394,21 +324,19 @@ function AnDiosUi:AddMessage(gui, title, text, duration)
     TextLabel.Position = UDim2.new(0, 10, 0, 40)
     TextLabel.Font = Enum.Font.SourceSans
     TextLabel.Text = text
-    TextLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-    TextLabel.TextSize = 16
-    TextLabel.TextWrapped = true
+    TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TextLabel.TextSize = 18
     TextLabel.TextXAlignment = Enum.TextXAlignment.Left
     TextLabel.TextYAlignment = Enum.TextYAlignment.Top
 
     TweenIn(MessageFrame, {Position = UDim2.new(1, -310, 1, -110)}, 0.5)
 
-    delay(duration or 3, function()
-        TweenOut(MessageFrame, {Position = UDim2.new(1, 300, 1, -110)}, 0.5).Completed:Connect(function()
-            MessageFrame:Destroy()
-        end)
+    wait(duration)
+
+    local tween = TweenOut(MessageFrame, {Position = UDim2.new(1, 10, 1, -110)}, 0.5)
+    tween.Completed:Connect(function()
+        MessageFrame:Destroy()
     end)
 
     return MessageFrame
 end
-
-return AnDiosUi
