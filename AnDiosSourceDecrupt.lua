@@ -3,22 +3,15 @@ local UserInputService = game:GetService("UserInputService")
 
 local AnDiosUi = {}
 
--- Функция для создания твина
-local function TweenIn(object, properties, duration)
-    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+-- Create a tween for UI element animations
+local function CreateTween(object, properties, duration, easingStyle, easingDirection)
+    local tweenInfo = TweenInfo.new(duration, easingStyle, easingDirection)
     local tween = TweenService:Create(object, tweenInfo, properties)
     tween:Play()
     return tween
 end
 
-local function TweenOut(object, properties, duration)
-    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-    local tween = TweenService:Create(object, tweenInfo, properties)
-    tween:Play()
-    return tween
-end
-
--- Функция для организации элементов в табе
+-- Arrange elements within a given tab
 local function ArrangeElements(tab)
     local elements = tab:GetChildren()
     local yOffset = 10
@@ -31,7 +24,7 @@ local function ArrangeElements(tab)
     tab.Size = UDim2.new(1, 0, 0, yOffset)
 end
 
--- Функция для создания UI
+-- Create the main window
 function AnDiosUi:CreateWindow(title)
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Parent = game.CoreGui
@@ -55,8 +48,6 @@ function AnDiosUi:CreateWindow(title)
     Header.Size = UDim2.new(1, 0, 0, 50)
     Header.Position = UDim2.new(0, 0, 0, 0)
     Header.BorderSizePixel = 0
-    Header.Active = true
-    Header.Draggable = true
 
     local Title = Instance.new("TextLabel")
     Title.Parent = Header
@@ -97,9 +88,9 @@ function AnDiosUi:CreateWindow(title)
     MinimizeButton.MouseButton1Click:Connect(function()
         isMinimized = not isMinimized
         if isMinimized then
-            TweenOut(MainFrame, {Size = UDim2.new(0, 500, 0, 50)}, 0.5)
+            CreateTween(MainFrame, {Size = UDim2.new(0, 500, 0, 50)}, 0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
         else
-            TweenIn(MainFrame, {Size = UDim2.new(0, 500, 0, 500)}, 0.5)
+            CreateTween(MainFrame, {Size = UDim2.new(0, 500, 0, 500)}, 0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
         end
     end)
 
@@ -135,7 +126,7 @@ function AnDiosUi:CreateWindow(title)
     }
 end
 
--- Функция для добавления вкладки
+-- Add a tab with a button to switch between content
 function AnDiosUi:AddTab(gui, name)
     local TabButton = Instance.new("TextButton")
     TabButton.Parent = gui.TabFrame
@@ -172,7 +163,7 @@ function AnDiosUi:AddTab(gui, name)
     return TabContent
 end
 
--- Функция для добавления лейбла
+-- Add a label to a tab
 function AnDiosUi:AddLabel(tab, text)
     local Label = Instance.new("TextLabel")
     Label.Parent = tab
@@ -193,7 +184,7 @@ function AnDiosUi:AddLabel(tab, text)
     return Label
 end
 
--- Функция для добавления кнопки
+-- Add a button to a tab
 function AnDiosUi:AddButton(tab, text, callback)
     local Button = Instance.new("TextButton")
     Button.Parent = tab
@@ -209,39 +200,46 @@ function AnDiosUi:AddButton(tab, text, callback)
     UICorner.CornerRadius = UDim.new(0, 4)
     UICorner.Parent = Button
 
-    Button.MouseButton1Click:Connect(callback)
+    Button.MouseButton1Click:Connect(function()
+        if callback then
+            callback()
+        end
+    end)
 
     ArrangeElements(tab)
 
     return Button
 end
 
--- Функция для добавления текстбокса
-function AnDiosUi:AddTextBox(tab, placeholderText, callback)
-    local TextBox = Instance.new("TextBox")
-    TextBox.Parent = tab
-    TextBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    TextBox.Size = UDim2.new(1, -20, 0, 30)
-    TextBox.Font = Enum.Font.SourceSans
-    TextBox.PlaceholderText = placeholderText
-    TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TextBox.TextSize = 18
-    TextBox.BorderSizePixel = 0
-    TextBox.ClearTextOnFocus = false
+-- Add a message to a tab
+function AnDiosUi:AddMessage(tab, message, duration)
+    local MessageLabel = Instance.new("TextLabel")
+    MessageLabel.Parent = tab
+    MessageLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    MessageLabel.Size = UDim2.new(1, -20, 0, 30)
+    MessageLabel.Font = Enum.Font.SourceSans
+    MessageLabel.Text = message
+    MessageLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    MessageLabel.TextSize = 18
+    MessageLabel.BorderSizePixel = 0
+    MessageLabel.TextTransparency = 0
+    MessageLabel.Visible = true
 
     local UICorner = Instance.new("UICorner")
     UICorner.CornerRadius = UDim.new(0, 4)
-    UICorner.Parent = TextBox
+    UICorner.Parent = MessageLabel
 
-    TextBox.FocusLost:Connect(function(enterPressed)
-        if enterPressed then
-            callback(TextBox.Text)
-        end
-    end)
+    if duration then
+        delay(duration, function()
+            CreateTween(MessageLabel, {TextTransparency = 1}, 0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+            wait(0.5)
+            MessageLabel:Destroy()
+        end)
+    end
 
     ArrangeElements(tab)
 
-    return TextBox
+    return MessageLabel
 end
 
 return AnDiosUi
