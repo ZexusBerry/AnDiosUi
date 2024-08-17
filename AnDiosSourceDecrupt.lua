@@ -23,7 +23,7 @@ local function ArrangeElements(tab)
     local elements = tab:GetChildren()
     local yOffset = 10
     for _, element in ipairs(elements) do
-        if element:IsA("Frame") or element:IsA("TextButton") or element:IsA("TextLabel") or element:IsA("TextBox") then
+        if element:IsA("Frame") or element:IsA("TextButton") or element:IsA("TextLabel") or element:IsA("TextBox") or element:IsA("TextBox") or element:IsA("ImageButton") then
             element.Position = UDim2.new(0, 10, 0, yOffset)
             yOffset = yOffset + element.Size.Y.Offset + 10
         end
@@ -124,6 +124,36 @@ function AnDiosUi:CreateWindow(title)
     ContentList.SortOrder = Enum.SortOrder.LayoutOrder
     ContentList.Padding = UDim.new(0, 10)
 
+    -- Перемещение окна
+    local dragToggle = nil
+    local dragStart = nil
+    local startPos = nil
+
+    local function update(input)
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+
+    MainFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragToggle = true
+            dragStart = input.Position
+            startPos = MainFrame.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragToggle = false
+                end
+            end)
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if dragToggle then
+            update(input)
+        end
+    end)
+
     return {
         ScreenGui = ScreenGui,
         MainFrame = MainFrame,
@@ -174,241 +204,123 @@ end
 function AnDiosUi:AddLabel(tab, text)
     local Label = Instance.new("TextLabel")
     Label.Parent = tab
-    Label.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    Label.Size = UDim2.new(1, -20, 0, 30)
+    Label.BackgroundTransparency = 1
+    Label.Size = UDim2.new(1, 0, 0, 50)
     Label.Font = Enum.Font.SourceSans
     Label.Text = text
     Label.TextColor3 = Color3.fromRGB(255, 255, 255)
     Label.TextSize = 18
-    Label.BorderSizePixel = 0
-
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 4)
-    UICorner.Parent = Label
-
-    ArrangeElements(tab)
-
-    return Label
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.TextYAlignment = Enum.TextYAlignment.Center
 end
 
 -- Функция для добавления кнопки
 function AnDiosUi:AddButton(tab, text, callback)
     local Button = Instance.new("TextButton")
     Button.Parent = tab
-    Button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    Button.Size = UDim2.new(1, -20, 0, 30)
+    Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    Button.Size = UDim2.new(1, 0, 0, 50)
     Button.Font = Enum.Font.SourceSansBold
     Button.Text = text
     Button.TextColor3 = Color3.fromRGB(255, 255, 255)
     Button.TextSize = 18
     Button.BorderSizePixel = 0
 
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 4)
-    UICorner.Parent = Button
+    Button.MouseButton1Click:Connect(callback)
 
-    Button.MouseButton1Click:Connect(function()
-        if callback then
-            callback()
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 6)
+    UICorner.Parent = Button
+end
+
+-- Функция для добавления текстового поля
+function AnDiosUi:AddTextBox(tab, placeholderText, callback)
+    local TextBox = Instance.new("TextBox")
+    TextBox.Parent = tab
+    TextBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    TextBox.Size = UDim2.new(1, 0, 0, 50)
+    TextBox.Font = Enum.Font.SourceSans
+    TextBox.PlaceholderText = placeholderText
+    TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TextBox.TextSize = 18
+    TextBox.BorderSizePixel = 0
+    TextBox.ClearTextOnFocus = false
+
+    TextBox.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            callback(TextBox.Text)
         end
     end)
 
-    ArrangeElements(tab)
-
-    return Button
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 6)
+    UICorner.Parent = TextBox
 end
 
 -- Функция для добавления чекбокса
 function AnDiosUi:AddCheckBox(tab, text, callback)
     local CheckBoxFrame = Instance.new("Frame")
     CheckBoxFrame.Parent = tab
-    CheckBoxFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    CheckBoxFrame.Size = UDim2.new(1, -20, 0, 30)
+    CheckBoxFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    CheckBoxFrame.Size = UDim2.new(1, 0, 0, 50)
     CheckBoxFrame.BorderSizePixel = 0
-
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 4)
-    UICorner.Parent = CheckBoxFrame
 
     local CheckBox = Instance.new("TextButton")
     CheckBox.Parent = CheckBoxFrame
-    CheckBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    CheckBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     CheckBox.Size = UDim2.new(0, 30, 0, 30)
-    CheckBox.Font = Enum.Font.SourceSansBold
+    CheckBox.Font = Enum.Font.SourceSans
     CheckBox.Text = ""
+    CheckBox.TextColor3 = Color3.fromRGB(255, 255, 255)
     CheckBox.BorderSizePixel = 0
 
-    local Check = Instance.new("TextLabel")
-    Check.Parent = CheckBox
-    Check.BackgroundTransparency = 1
-    Check.Size = UDim2.new(1, 0, 1, 0)
-    Check.Font = Enum.Font.SourceSansBold
-    Check.Text = "✓"
-    Check.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Check.TextSize = 18
-    Check.Visible = false
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 6)
+    UICorner.Parent = CheckBox
+
+    local CheckMark = Instance.new("ImageLabel")
+    CheckMark.Parent = CheckBox
+    CheckMark.Size = UDim2.new(1, 0, 1, 0)
+    CheckMark.BackgroundTransparency = 1
+    CheckMark.Image = "rbxassetid://1312764337"  -- Путь к изображению галочки
+    CheckMark.Visible = false
 
     local Label = Instance.new("TextLabel")
     Label.Parent = CheckBoxFrame
     Label.BackgroundTransparency = 1
-    Label.Position = UDim2.new(0, 40, 0, 0)
     Label.Size = UDim2.new(1, -40, 1, 0)
-    Label.Font = Enum.Font.SourceSansBold
+    Label.Position = UDim2.new(0, 40, 0, 0)
+    Label.Font = Enum.Font.SourceSans
     Label.Text = text
     Label.TextColor3 = Color3.fromRGB(255, 255, 255)
     Label.TextSize = 18
     Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.TextYAlignment = Enum.TextYAlignment.Center
 
-    local checked = false
     CheckBox.MouseButton1Click:Connect(function()
-        checked = not checked
-        Check.Visible = checked
-        if callback then
-            callback(checked)
-        end
+        CheckMark.Visible = not CheckMark.Visible
+        callback(CheckMark.Visible)
     end)
-
-    ArrangeElements(tab)
-
-    return CheckBox
-end
-
--- Функция для добавления разделителя
-function AnDiosUi:AddDivider(tab)
-    local Divider = Instance.new("Frame")
-    Divider.Parent = tab
-    Divider.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    Divider.Size = UDim2.new(1, -20, 0, 2)
-    Divider.BorderSizePixel = 0
-
-    ArrangeElements(tab)
-
-    return Divider
-end
-
--- Функция для добавления выпадающего списка
-function AnDiosUi:AddDropDown(tab, options, callback)
-    local DropDownFrame = Instance.new("Frame")
-    DropDownFrame.Parent = tab
-    DropDownFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    DropDownFrame.Size = UDim2.new(1, -20, 0, 30)
-    DropDownFrame.BorderSizePixel = 0
 
     local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 4)
-    UICorner.Parent = DropDownFrame
-
-    local DropDownButton = Instance.new("TextButton")
-    DropDownButton.Parent = DropDownFrame
-    DropDownButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    DropDownButton.Size = UDim2.new(1, 0, 1, 0)
-    DropDownButton.Font = Enum.Font.SourceSansBold
-    DropDownButton.Text = "Select Option"
-    DropDownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    DropDownButton.TextSize = 18
-    DropDownButton.BorderSizePixel = 0
-
-    local DropDownList = Instance.new("Frame")
-    DropDownList.Parent = DropDownFrame
-    DropDownList.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    DropDownList.Size = UDim2.new(1, 0, 0, 0)
-    DropDownList.Position = UDim2.new(0, 0, 1, 0)
-    DropDownList.BorderSizePixel = 0
-    DropDownList.ClipsDescendants = true
-    DropDownList.Visible = false
-
-    local ListLayout = Instance.new("UIListLayout")
-    ListLayout.Parent = DropDownList
-    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
-    local isOpen = false
-    DropDownButton.MouseButton1Click:Connect(function()
-        isOpen = not isOpen
-        if isOpen then
-            DropDownList.Visible = true
-            TweenIn(DropDownList, {Size = UDim2.new(1, 0, 0, #options * 30)}, 0.2)
-        else
-            TweenOut(DropDownList, {Size = UDim2.new(1, 0, 0, 0)}, 0.2).Completed:Connect(function()
-                DropDownList.Visible = false
-            end)
-        end
-    end)
-
-    for _, option in ipairs(options) do
-        local OptionButton = Instance.new("TextButton")
-        OptionButton.Parent = DropDownList
-        OptionButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        OptionButton.Size = UDim2.new(1, 0, 0, 30)
-        OptionButton.Font = Enum.Font.SourceSansBold
-        OptionButton.Text = option
-        OptionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        OptionButton.TextSize = 18
-        OptionButton.BorderSizePixel = 0
-
-        OptionButton.MouseButton1Click:Connect(function()
-            DropDownButton.Text = option
-            isOpen = false
-            TweenOut(DropDownList, {Size = UDim2.new(1, 0, 0, 0)}, 0.2).Completed:Connect(function()
-                DropDownList.Visible = false
-            end)
-            if callback then
-                callback(option)
-            end
-        end)
-    end
-
-    ArrangeElements(tab)
-
-    return DropDownButton
+    UICorner.CornerRadius = UDim.new(0, 6)
+    UICorner.Parent = CheckBoxFrame
 end
 
 -- Функция для добавления сообщения
-function AnDiosUi:AddMessage(gui, title, text, duration)
-    local MessageFrame = Instance.new("Frame")
-    MessageFrame.Parent = gui.ScreenGui
-    MessageFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    MessageFrame.Size = UDim2.new(0, 300, 0, 100)
-    MessageFrame.Position = UDim2.new(1, 300, 1, -110)
-    MessageFrame.BorderSizePixel = 0
-    MessageFrame.ClipsDescendants = true
-
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 10)
-    UICorner.Parent = MessageFrame
-
-    local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Parent = MessageFrame
-    TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Size = UDim2.new(1, -20, 0, 30)
-    TitleLabel.Position = UDim2.new(0, 10, 0, 10)
-    TitleLabel.Font = Enum.Font.SourceSansBold
-    TitleLabel.Text = title
-    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TitleLabel.TextSize = 18
-    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-    local TextLabel = Instance.new("TextLabel")
-    TextLabel.Parent = MessageFrame
-    TextLabel.BackgroundTransparency = 1
-    TextLabel.Size = UDim2.new(1, -20, 0, 50)
-    TextLabel.Position = UDim2.new(0, 10, 0, 40)
-    TextLabel.Font = Enum.Font.SourceSans
-    TextLabel.Text = text
-    TextLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-    TextLabel.TextSize = 16
-    TextLabel.TextWrapped = true
-    TextLabel.TextXAlignment = Enum.TextXAlignment.Left
-    TextLabel.TextYAlignment = Enum.TextYAlignment.Top
-
-    TweenIn(MessageFrame, {Position = UDim2.new(1, -310, 1, -110)}, 0.5)
-
-    delay(duration or 3, function()
-        TweenOut(MessageFrame, {Position = UDim2.new(1, 300, 1, -110)}, 0.5).Completed:Connect(function()
-            MessageFrame:Destroy()
-        end)
-    end)
-
-    return MessageFrame
+function AnDiosUi:AddMessage(tab, text, messageType)
+    local Message = Instance.new("TextLabel")
+    Message.Parent = tab
+    Message.BackgroundTransparency = 1
+    Message.Size = UDim2.new(1, 0, 0, 50)
+    Message.Font = Enum.Font.SourceSans
+    Message.Text = text
+    Message.TextColor3 = messageType == "success" and Color3.fromRGB(0, 255, 0) or
+                      messageType == "error" and Color3.fromRGB(255, 0, 0) or
+                      Color3.fromRGB(255, 255, 255)
+    Message.TextSize = 18
+    Message.TextXAlignment = Enum.TextXAlignment.Left
+    Message.TextYAlignment = Enum.TextYAlignment.Center
 end
 
 return AnDiosUi
